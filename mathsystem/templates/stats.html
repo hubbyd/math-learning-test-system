@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}统计分析{% endblock %}
+{% block content %}
+<h2>统计分析</h2>
+
+<h3>综合测试总体情况</h3>
+<div class="cards">
+  <div class="card stat"><div class="stat-num">{{ summary['c'] or 0 }}</div><div class="stat-label">提交试卷数</div></div>
+  <div class="card stat"><div class="stat-num">{{ summary['avg_rate']|round(1) if summary['avg_rate'] else 0 }}</div><div class="stat-label">平均得分率(%)</div></div>
+  <div class="card stat"><div class="stat-num">{{ summary['max_rate']|round(1) if summary['max_rate'] else 0 }}</div><div class="stat-label">最高得分率(%)</div></div>
+  <div class="card stat"><div class="stat-num">{{ summary['min_rate']|round(1) if summary['min_rate'] else 0 }}</div><div class="stat-label">最低得分率(%)</div></div>
+</div>
+
+<h3>成绩分布</h3>
+<table class="table">
+  <thead><tr><th>分数段</th><th>人数</th></tr></thead>
+  <tbody>
+  {% for d in dist %}
+    <tr><td>{{ d['band'] }}</td><td>{{ d['c'] }}</td></tr>
+  {% else %}
+    <tr><td colspan="2" class="muted">暂无数据</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h3>各章节练习正确率</h3>
+<table class="table">
+  <thead><tr><th>章节</th><th>练习人次</th><th>答对人次</th><th>正确率</th></tr></thead>
+  <tbody>
+  {% for s in chapter_stats %}
+    <tr>
+      <td>{{ s['name'] }}</td>
+      <td>{{ s['attempts'] }}</td>
+      <td>{{ s['correct'] }}</td>
+      <td>
+        <div class="bar"><div class="bar-in" style="width: {{ s['rate'] }}%"></div></div>
+        {{ s['rate'] }}%
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

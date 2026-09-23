@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}随堂练习{% endblock %}
+{% block content %}
+<h2>随堂练习</h2>
+<p class="muted">选择章节与题量，系统随机抽题，提交后即时判分并给出解析。</p>
+<form class="form-box wide" method="get" action="{{ url_for('practice_start') }}">
+  <label>章节</label>
+  <select name="chapter_id" required>
+    <option value="">请选择章节</option>
+    {% for c in chapters %}
+      <option value="{{ c['id'] }}"
+        {% if request.args.get('chapter_id')|int == c['id'] %}selected{% endif %}>{{ c['name'] }}</option>
+    {% endfor %}
+  </select>
+  <label>题量</label>
+  <select name="count">
+    {% for n in [5, 10, 15, 20] %}
+      <option value="{{ n }}">{{ n }} 题</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn primary">开始练习</button>
+</form>
+{% endblock %}

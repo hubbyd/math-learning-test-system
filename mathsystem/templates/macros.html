@@ -1,0 +1,57 @@
+{% macro question_input(q, idx) %}
+<div class="question-block">
+  <div class="q-head">
+    <span class="q-index">第 {{ idx }} 题</span>
+    <span class="badge">{{ q['qtype_name'] }}</span>
+    <span class="badge diff">难度：{{ q['diff_name'] }}</span>
+    <span class="badge score">{{ q['score'] }} 分</span>
+  </div>
+  <div class="q-content">{{ q['content']|safe }}</div>
+
+  <div class="q-options">
+    {% if q['qtype'] == 'single' %}
+      {% for opt in q['options'] %}
+        <label class="opt">
+          <input type="radio" name="q_{{ q['id'] }}" value="{{ 'ABCD'[loop.index0] }}">
+          <span class="letter">{{ 'ABCD'[loop.index0] }}.</span> {{ opt|safe }}
+        </label>
+      {% endfor %}
+    {% elif q['qtype'] == 'multi' %}
+      {% for opt in q['options'] %}
+        <label class="opt">
+          <input type="checkbox" name="q_{{ q['id'] }}" value="{{ 'ABCD'[loop.index0] }}">
+          <span class="letter">{{ 'ABCD'[loop.index0] }}.</span> {{ opt|safe }}
+        </label>
+      {% endfor %}
+      <p class="hint">多选题请选择所有正确选项</p>
+    {% elif q['qtype'] == 'judge' %}
+      <label class="opt"><input type="radio" name="q_{{ q['id'] }}" value="T"> 正确</label>
+      <label class="opt"><input type="radio" name="q_{{ q['id'] }}" value="F"> 错误</label>
+    {% else %}
+      <input type="text" class="fill-input" name="q_{{ q['id'] }}" placeholder="请输入答案">
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro question_review(item, idx) %}
+<div class="question-block {{ 'ok' if item['is_correct'] else 'bad' }}">
+  <div class="q-head">
+    <span class="q-index">第 {{ idx }} 题</span>
+    <span class="badge">{{ item['question']['qtype_name'] }}</span>
+    {% if item['is_correct'] %}
+      <span class="badge right">答对 +{{ item['got_score'] }} 分</span>
+    {% else %}
+      <span class="badge wrong">答错 0 分</span>
+    {% endif %}
+  </div>
+  <div class="q-content">{{ item['question']['content']|safe }}</div>
+  <div class="review">
+    <p>你的答案：<span class="{{ 'ans-right' if item['is_correct'] else 'ans-wrong' }}">{{ item['user_answer'] or '（未作答）' }}</span></p>
+    <p>正确答案：<span class="ans-right">{{ item['display_answer'] }}</span></p>
+    {% if item['question']['analysis'] %}
+      <p>解析：{{ item['question']['analysis']|safe }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# IDE / 工具生成
+.trae-html-share-packages/
+.vscode/
+.idea/
+.DS_Store
+
+# 运行期生成（首次运行会自动重建）
+# mathsystem/mathlearn.db

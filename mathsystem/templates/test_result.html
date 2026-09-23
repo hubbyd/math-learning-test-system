@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}测试结果{% endblock %}
+{% block content %}
+<h2>测试结果</h2>
+<div class="result-summary">
+  <span>试卷：{{ paper['title'] }}</span>
+  <span>得分：<strong>{{ paper['got_score'] }}</strong> / {{ paper['total_score'] }}</span>
+  <span>得分率：<strong>{{ rate }}%</strong></span>
+  <span>提交时间：{{ paper['submitted_at'] }}</span>
+</div>
+{% for item in details %}
+  {{ m.question_review(item, loop.index) }}
+{% endfor %}
+<div class="actions">
+  <a class="btn primary" href="{{ url_for('test_form') }}">再测一次</a>
+  <a class="btn" href="{{ url_for('scores') }}">查看成绩记录</a>
+</div>
+{% endblock %}

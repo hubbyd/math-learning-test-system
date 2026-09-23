@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ '编辑题目' if q else '新增题目' }}{% endblock %}
+{% block content %}
+<h2>{{ '编辑题目' if q else '新增题目' }}</h2>
+<form class="form-box wide" method="post"
+      id="qform">
+  <label>所属章节</label>
+  <select name="chapter_id" required>
+    {% for c in chapters %}
+      <option value="{{ c['id'] }}"
+        {% if (form and form['chapter_id']==c['id']) or (q and q['chapter_id']==c['id']) %}selected{% endif %}>
+        {{ c['name'] }}</option>
+    {% endfor %}
+  </select>
+
+  <label>题型</label>
+  <select name="qtype" id="qtype">
+    {% for k, v in QTYPE_NAMES.items() %}
+      <option value="{{ k }}"
+        {% if (form and form['qtype']==k) or (q and q['qtype']==k) %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select>
+
+  <label>难度</label>
+  <select name="difficulty">
+    {% for k, v in DIFF_NAMES.items() %}
+      <option value="{{ k }}"
+        {% if (form and form['difficulty']==k) or (q and q['difficulty']==k) %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select>
+
+  <label>题干（支持 LaTeX 公式，如 \(x^2\)）</label>
+  <textarea name="content" rows="3" required>{{ form['content'] if form else (q['content'] if q else '') }}</textarea>
+
+  <div id="options-box">
+    <label>选项（选择题填写，至少两项）</label>
+    {% for i in range(4) %}
+      <input type="text" name="option_{{ i }}" placeholder="选项 {{ 'ABCD'[i] }}"
+             value="{% if form and form['options']|length > i %}{{ form['options'][i] }}{% elif q and q['options']|length > i %}{{ q['options'][i] }}{% endif %}">
+    {% endfor %}
+  </div>
+
+  <label>正确答案（单选如 B；多选如 A,B；判断填 T 或 F；填空填答案文本）</label>
+  <input type="text" name="answer" required
+         value="{{ form['answer'] if form else (q['answer'] if q else '') }}">
+
+  <label>解析</label>
+  <textarea name="analysis" rows="2">{{ form['analysis'] if form else (q['analysis'] if q else '') }}</textarea>
+
+  <label>分值</label>
+  <input type="number" name="score" step="0.5" min="0"
+         value="{{ form['score'] if form else (q['score'] if q else 5) }}">
+
+  <button type="submit" class="btn primary">保存</button>
+  <a class="btn" href="{{ url_for('questions') }}">取消</a>
+</form>
+
+<script>
+  function toggleOptions() {
+    var t = document.getElementById('qtype').value;
+    document.getElementById('options-box').style.display =
+      (t === 'single' || t === 'multi') ? 'block' : 'none';
+  }
+  document.getElementById('qtype').addEventListener('change', toggleOptions);
+  toggleOptions();
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}练习结果{% endblock %}
+{% block content %}
+<h2>练习结果</h2>
+<div class="result-summary">
+  <span>共 {{ total }} 题</span>
+  <span>答对 {{ right }} 题</span>
+  <span>正确率 <strong>{{ rate }}%</strong></span>
+</div>
+{% for item in results %}
+  {{ m.question_review(item, loop.index) }}
+{% endfor %}
+<div class="actions">
+  <a class="btn primary" href="{{ url_for('practice') }}">再练一次</a>
+  <a class="btn" href="{{ url_for('index') }}">返回首页</a>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}课程学习{% endblock %}
+{% block content %}
+<h2>课程学习</h2>
+<p class="muted">系统紧扣高等数学教学大纲，将全部教学内容按章节组织，支持知识讲解、典型例题与课件学习。</p>
+<table class="table">
+  <thead><tr><th>序号</th><th>章节名称</th><th>课节数</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for c in chapters %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ c['name'] }}</td>
+      <td>{{ c['lesson_cnt'] }}</td>
+      <td><a href="{{ url_for('learning_chapter', cid=c['id']) }}">查看课节</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

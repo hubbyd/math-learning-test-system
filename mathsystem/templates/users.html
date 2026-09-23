@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}用户管理{% endblock %}
+{% block content %}
+<h2>用户管理</h2>
+<table class="table">
+  <thead><tr><th>ID</th><th>用户名</th><th>姓名</th><th>角色</th><th>注册时间</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u['id'] }}</td>
+      <td>{{ u['username'] }}</td>
+      <td>{{ u['real_name'] or '-' }}</td>
+      <td>{% if u['role']=='admin' %}管理员{% elif u['role']=='teacher' %}教师{% else %}学生{% endif %}</td>
+      <td>{{ u['created_at'] }}</td>
+      <td>
+        {% if u['id'] != current_user['id'] %}
+          <form method="post" action="{{ url_for('user_delete', uid=u['id']) }}" class="inline"
+                onsubmit="return confirm('确定删除该用户吗？');">
+            <button type="submit" class="link-danger">删除</button>
+          </form>
+        {% else %}<span class="muted">当前账号</span>{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

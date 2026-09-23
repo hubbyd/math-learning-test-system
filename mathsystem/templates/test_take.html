@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}综合测试答题{% endblock %}
+{% block content %}
+<div class="paper-head">
+  <h2>{{ paper['title'] }}</h2>
+  <div class="paper-meta">
+    <span>总分：{{ paper['total_score'] }} 分</span>
+    <span>共 {{ questions|length }} 题</span>
+    <span class="timer">剩余时间：<strong id="timer">--:--</strong></span>
+  </div>
+</div>
+<form id="paper-form" method="post" action="{{ url_for('test_submit', pid=paper['id']) }}">
+  {% for q in questions %}
+    {{ m.question_input(q, loop.index) }}
+  {% endfor %}
+  <div class="actions">
+    <button type="submit" class="btn primary">提交试卷</button>
+  </div>
+</form>
+
+<script>
+  // 限时 30 分钟，倒计时结束后自动交卷
+  var remain = 30 * 60;
+  var timerEl = document.getElementById('timer');
+  function fmt(s) {
+    var m = Math.floor(s / 60), x = s % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (x < 10 ? '0' : '') + x;
+  }
+  timerEl.textContent = fmt(remain);
+  var t = setInterval(function () {
+    remain--;
+    timerEl.textContent = fmt(Math.max(remain, 0));
+    if (remain <= 0) {
+      clearInterval(t);
+      alert('考试时间到，系统将自动交卷。');
+      document.getElementById('paper-form').submit();
+    }
+  }, 1000);
+</script>
+{% endblock %}

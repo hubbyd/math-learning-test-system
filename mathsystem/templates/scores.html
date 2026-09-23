@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}成绩查询{% endblock %}
+{% block content %}
+<h2>成绩查询</h2>
+{% if user['role'] == 'student' %}
+<p class="muted">以下是你的历次综合测试成绩。</p>
+{% else %}
+<p class="muted">以下是全部学生的综合测试成绩。</p>
+{% endif %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>试卷ID</th>
+      {% if user['role'] != 'student' %}<th>学生</th>{% endif %}
+      <th>试卷名称</th><th>得分</th><th>总分</th><th>得分率</th><th>提交时间</th><th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in papers %}
+    <tr>
+      <td>{{ p['id'] }}</td>
+      {% if user['role'] != 'student' %}<td>{{ p['real_name'] or p['username'] }}</td>{% endif %}
+      <td>{{ p['title'] }}</td>
+      <td>{{ p['got_score'] }}</td>
+      <td>{{ p['total_score'] }}</td>
+      <td>{% if p['total_score'] %}{{ (p['got_score'] * 100 / p['total_score'])|round(1) }}%{% else %}-{% endif %}</td>
+      <td>{{ p['submitted_at'] }}</td>
+      <td><a href="{{ url_for('test_result', pid=p['id']) }}">查看详情</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">暂无成绩记录</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

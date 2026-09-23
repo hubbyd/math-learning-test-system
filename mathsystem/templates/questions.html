@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}题库管理{% endblock %}
+{% block content %}
+<h2>题库管理</h2>
+<div class="toolbar">
+  <form method="get" class="inline-form">
+    <select name="chapter_id">
+      <option value="">全部章节</option>
+      {% for c in chapters %}
+        <option value="{{ c['id'] }}" {% if sel_cid == c['id'] %}selected{% endif %}>{{ c['name'] }}</option>
+      {% endfor %}
+    </select>
+    <select name="qtype">
+      <option value="">全部题型</option>
+      {% for k, v in QTYPE_NAMES.items() %}
+        <option value="{{ k }}" {% if sel_qtype == k %}selected{% endif %}>{{ v }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit">筛选</button>
+  </form>
+  <a class="btn primary" href="{{ url_for('question_new') }}">新增题目</a>
+</div>
+
+<table class="table">
+  <thead>
+    <tr><th>ID</th><th>章节</th><th>题型</th><th>难度</th><th>题干</th><th>答案</th><th>分值</th><th>操作</th></tr>
+  </thead>
+  <tbody>
+  {% for q in questions %}
+    <tr>
+      <td>{{ q['id'] }}</td>
+      <td>{{ q['chapter_name'] }}</td>
+      <td>{{ q['qtype_name'] }}</td>
+      <td>{{ q['diff_name'] }}</td>
+      <td class="q-cell">{{ q['content']|safe }}</td>
+      <td>{{ q['answer'] }}</td>
+      <td>{{ q['score'] }}</td>
+      <td>
+        <a href="{{ url_for('question_edit', qid=q['id']) }}">编辑</a>
+        <form method="post" action="{{ url_for('question_delete', qid=q['id']) }}" class="inline"
+              onsubmit="return confirm('确定删除该题目吗？');">
+          <button type="submit" class="link-danger">删除</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">暂无题目</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

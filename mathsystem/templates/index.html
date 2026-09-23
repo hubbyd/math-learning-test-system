@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>欢迎，{{ current_user['real_name'] or current_user['username'] }}</h2>
+
+<div class="cards">
+  <div class="card stat">
+    <div class="stat-num">{{ practice_cnt }}</div>
+    <div class="stat-label">累计练习次数</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-num">{{ paper_cnt }}</div>
+    <div class="stat-label">已完成综合测试</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-num">{{ avg }}</div>
+    <div class="stat-label">测试平均分</div>
+  </div>
+</div>
+
+<h3>功能入口</h3>
+<div class="cards">
+  <a class="card entry" href="{{ url_for('learning') }}">
+    <h4>课程学习</h4><p>按章节浏览知识讲解与典型例题</p></a>
+  <a class="card entry" href="{{ url_for('practice') }}">
+    <h4>随堂练习</h4><p>按章节抽题练习，即时判分与解析</p></a>
+  <a class="card entry" href="{{ url_for('test_form') }}">
+    <h4>综合测试</h4><p>按题型比例自动组卷，限时答题</p></a>
+  <a class="card entry" href="{{ url_for('scores') }}">
+    <h4>成绩查询</h4><p>查看历史测试成绩与错题</p></a>
+</div>
+
+<h3>课程章节</h3>
+<table class="table">
+  <thead><tr><th>序号</th><th>章节名称</th><th>课节数</th><th>题目数</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for c in chapters %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ c['name'] }}</td>
+      <td>{{ c['lesson_cnt'] }}</td>
+      <td>{{ c['q_cnt'] }}</td>
+      <td><a href="{{ url_for('learning_chapter', cid=c['id']) }}">进入学习</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

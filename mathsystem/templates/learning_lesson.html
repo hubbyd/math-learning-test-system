@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ lesson['title'] }}{% endblock %}
+{% block content %}
+<p class="muted"><a href="{{ url_for('learning_chapter', cid=chapter['id']) }}">{{ chapter['name'] }}</a> / {{ lesson['title'] }}</p>
+<h2>{{ lesson['title'] }}</h2>
+<div class="lesson-content">{{ lesson['content']|safe }}</div>
+<div class="actions">
+  <a class="btn" href="{{ url_for('learning_chapter', cid=chapter['id']) }}">返回本章</a>
+  <a class="btn primary" href="{{ url_for('practice') }}?chapter_id={{ chapter['id'] }}">做本章练习</a>
+</div>
+{% endblock %}

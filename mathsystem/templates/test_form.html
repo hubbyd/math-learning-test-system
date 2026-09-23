@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}综合测试{% endblock %}
+{% block content %}
+<h2>综合测试 · 自动组卷</h2>
+<p class="muted">按章节范围、题型数量和难度系数自动组卷，限时答题，系统自动判分并给出成绩分析。</p>
+<form class="form-box wide" method="post" action="{{ url_for('test_create') }}">
+  <label>章节范围（不选表示全部章节）</label>
+  <div class="checkbox-group">
+    {% for c in chapters %}
+      <label class="inline-check"><input type="checkbox" name="chapters" value="{{ c['id'] }}"> {{ c['name'] }}</label>
+    {% endfor %}
+  </div>
+  <label>题型数量</label>
+  <div class="range-grid">
+    <div><span>单选题</span><input type="number" name="n_single" value="5" min="0" max="20"></div>
+    <div><span>多选题</span><input type="number" name="n_multi" value="2" min="0" max="20"></div>
+    <div><span>判断题</span><input type="number" name="n_judge" value="3" min="0" max="20"></div>
+    <div><span>填空题</span><input type="number" name="n_fill" value="2" min="0" max="20"></div>
+  </div>
+  <label>难度系数</label>
+  <select name="difficulty">
+    <option value="0">不限</option>
+    <option value="1">易</option>
+    <option value="2">中</option>
+    <option value="3">难</option>
+  </select>
+  <button type="submit" class="btn primary">生成试卷并开始测试</button>
+</form>
+{% endblock %}

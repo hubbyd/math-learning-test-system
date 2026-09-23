@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ chapter['name'] }}{% endblock %}
+{% block content %}
+<h2>{{ chapter['name'] }}</h2>
+<ul class="lesson-list">
+  {% for l in lessons %}
+    <li><a href="{{ url_for('learning_lesson', lid=l['id']) }}">{{ l['title'] }}</a></li>
+  {% else %}
+    <li class="muted">该章节暂无课节</li>
+  {% endfor %}
+</ul>
+<p><a class="btn" href="{{ url_for('learning') }}">返回章节列表</a></p>
+{% endblock %}
