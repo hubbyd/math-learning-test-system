@@ -1,5 +1,5 @@
 {% macro question_input(q, idx) %}
-<div class="question-block">
+<div class="question-block" id="q{{ idx }}">
   <div class="q-head">
     <span class="q-index">第 {{ idx }} 题</span>
     <span class="badge">{{ q['qtype_name'] }}</span>
@@ -44,6 +44,12 @@
     {% else %}
       <span class="badge wrong">答错 0 分</span>
     {% endif %}
+    <form method="post" action="{{ url_for('toggle_favorite', qid=item['question']['id']) }}" style="margin-left:auto;">
+      <input type="hidden" name="next" value="{{ request.full_path }}">
+      <button type="submit" class="fav-btn {{ 'on' if item['question']['id'] in favorite_ids }}">
+        {{ '★ 已收藏' if item['question']['id'] in favorite_ids else '☆ 收藏本题' }}
+      </button>
+    </form>
   </div>
   <div class="q-content">{{ item['question']['content']|safe }}</div>
   <div class="review">

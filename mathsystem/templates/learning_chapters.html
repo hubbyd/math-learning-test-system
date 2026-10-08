@@ -3,17 +3,20 @@
 {% block content %}
 <h2>课程学习</h2>
 <p class="muted">系统紧扣高等数学教学大纲，将全部教学内容按章节组织，支持知识讲解、典型例题与课件学习。</p>
-<table class="table">
-  <thead><tr><th>序号</th><th>章节名称</th><th>课节数</th><th>操作</th></tr></thead>
-  <tbody>
+<div class="chapter-list">
   {% for c in chapters %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ c['name'] }}</td>
-      <td>{{ c['lesson_cnt'] }}</td>
-      <td><a href="{{ url_for('learning_chapter', cid=c['id']) }}">查看课节</a></td>
-    </tr>
+    <a class="chapter-item" href="{{ url_for('learning_chapter', cid=c['id']) }}">
+      <div class="ch-head">
+        <span class="ch-no">CH {{ '%02d' % loop.index }}</span>
+        <span class="ch-name">{{ c['name'] }}</span>
+        <span class="ch-meta">{{ c['lesson_cnt'] }} 课节</span>
+      </div>
+      <div class="progress-meta">
+        <span>已学 {{ c['viewed'] }}/{{ c['lesson_cnt'] }} 课节</span>
+        <strong>{{ c['progress'] }}%</strong>
+      </div>
+      <div class="progress"><span style="width: {{ c['progress'] }}%"></span></div>
+    </a>
   {% endfor %}
-  </tbody>
-</table>
+</div>
 {% endblock %}

@@ -1,13 +1,33 @@
 {% extends "base.html" %}
 {% block title %}{{ chapter['name'] }}{% endblock %}
 {% block content %}
+<p class="muted"><a href="{{ url_for('learning') }}">课程学习</a> / {{ chapter['name'] }}</p>
 <h2>{{ chapter['name'] }}</h2>
-<ul class="lesson-list">
+
+<div class="progress-meta">
+  <span>本章共 {{ lessons|length }} 个课节 · 已学 {{ done }} 个 · 配套 {{ q_cnt }} 道习题</span>
+  <strong>{{ progress }}%</strong>
+</div>
+<div class="progress" style="margin-bottom:22px;"><span style="width: {{ progress }}%"></span></div>
+
+<div class="lesson-cards">
   {% for l in lessons %}
-    <li><a href="{{ url_for('learning_lesson', lid=l['id']) }}">{{ l['title'] }}</a></li>
+    {% set is_done = l['id'] in viewed %}
+    <a class="lesson-card {{ 'done' if is_done }}" href="{{ url_for('learning_lesson', lid=l['id']) }}">
+      <span class="no">{{ '%02d' % loop.index }}</span>
+      <span>
+        <span class="t">{{ l['title'] }}</span><br>
+        <span class="s">{{ '已学习 ✓' if is_done else '未学习' }}</span>
+      </span>
+      <span class="arrow">→</span>
+    </a>
   {% else %}
-    <li class="muted">该章节暂无课节</li>
+    <p class="muted">该章节暂无课节</p>
   {% endfor %}
-</ul>
-<p><a class="btn" href="{{ url_for('learning') }}">返回章节列表</a></p>
+</div>
+
+<div class="actions">
+  <a class="btn primary" href="{{ url_for('practice') }}?chapter_id={{ chapter['id'] }}">做本章练习</a>
+  <a class="btn" href="{{ url_for('learning') }}">返回章节列表</a>
+</div>
 {% endblock %}

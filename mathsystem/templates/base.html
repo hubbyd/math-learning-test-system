@@ -19,12 +19,18 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><a href="{{ url_for('index') }}">高等数学学习、测试系统</a></div>
+  <div class="brand">
+    <span class="brand-mark">∑</span>
+    <a href="{{ url_for('index') }}">高等数学学习、测试系统</a>
+  </div>
   <nav class="nav">
     {% if current_user %}
       <a href="{{ url_for('learning') }}">课程学习</a>
       <a href="{{ url_for('practice') }}">随堂练习</a>
       <a href="{{ url_for('test_form') }}">综合测试</a>
+      <a href="{{ url_for('wrongbook') }}">错题本</a>
+      <a href="{{ url_for('favorites') }}">收藏夹</a>
+      <a href="{{ url_for('leaderboard') }}">排行榜</a>
       <a href="{{ url_for('scores') }}">成绩查询</a>
       {% if current_user['role'] in ('teacher', 'admin') %}
         <a href="{{ url_for('questions') }}">题库管理</a>

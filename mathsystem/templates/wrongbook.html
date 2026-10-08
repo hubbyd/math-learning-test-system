@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}错题本{% endblock %}
+{% block content %}
+<h2>错题本</h2>
+<p class="muted">练习与测试中的错题会自动收录在这里；重做答对后将自动移除，逐个攻克你的薄弱知识点。</p>
+
+{% if questions %}
+<div class="result-summary">
+  <span>共收录 <strong>{{ questions|length }}</strong> 道错题</span>
+</div>
+<div class="actions" style="margin-top:0; margin-bottom:20px;">
+  <a class="btn primary" href="{{ url_for('wrongbook_practice') }}">重做错题</a>
+  <a class="btn" href="{{ url_for('practice') }}">去随堂练习</a>
+</div>
+
+{% for q in questions %}
+<div class="wrong-item">
+  <div class="w-head">
+    <span class="q-index">错题 {{ loop.index }}</span>
+    <span class="badge">{{ q['qtype_name'] }}</span>
+    <span class="badge diff">难度：{{ q['diff_name'] }}</span>
+    <span class="badge">{{ q['chapter_name'] }}</span>
+    <span class="wrong-cnt">已错 {{ q['wrong_cnt'] }} 次</span>
+    <form method="post" action="{{ url_for('wrongbook_remove', qid=q['id']) }}" style="margin-left:auto;">
+      <button type="submit" class="btn small danger">移除</button>
+    </form>
+  </div>
+  <div class="q-content">{{ q['content']|safe }}</div>
+  <div class="review">
+    <p>正确答案：<span class="ans-right">{{ q['display_answer'] }}</span></p>
+    {% if q['analysis'] %}
+      <p>解析：{{ q['analysis']|safe }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="card" style="text-align:center; padding:50px 20px;">
+  <p style="font-size:40px; margin:0 0 10px;">✓</p>
+  <p style="font-size:16px; font-weight:700; color:var(--text);">太棒了，错题本空空如也！</p>
+  <p class="muted">去 <a href="{{ url_for('practice') }}">随堂练习</a> 或 <a href="{{ url_for('test_form') }}">综合测试</a> 里继续保持。</p>
+</div>
+{% endif %}
+{% endblock %}

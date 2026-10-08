@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}排行榜{% endblock %}
+{% block content %}
+<h2>学习排行榜</h2>
+<p class="muted">
+  积分规则：练习答对 ×2 分 + 测试得分 + 课节学习 ×3 分 · 共 {{ total_users }} 名同学参与 · 你当前排名
+  <strong style="color:var(--red-bright); font-family:var(--mono);">第 {{ my_rank }} 名</strong>
+</p>
+
+<div class="rank-list">
+  {% for b in top10 %}
+  <div class="rank-item {{ 'me' if b['id'] == current_user['id'] }}">
+    <span class="rank-no {{ 'top' ~ loop.index if loop.index <= 3 }}">{{ loop.index }}</span>
+    <div>
+      <div class="rank-name">
+        {{ b['name'] }}
+        {% if b['id'] == current_user['id'] %}
+          <span class="badge wrong">我</span>
+        {% endif %}
+      </div>
+      <div class="rank-sub">答对 {{ b['practice_right'] }} 题 · 测试 {{ b['test_score'] }} 分 · 已学 {{ b['lessons'] }} 课节</div>
+    </div>
+    <span class="rank-pts">{{ b['points'] }}<small>积分</small></span>
+  </div>
+  {% endfor %}
+</div>
+
+{% if my_rank and my_rank > 10 %}
+<div class="rank-item me" style="margin-top:14px;">
+  <span class="rank-no">{{ my_rank }}</span>
+  <div>
+    <div class="rank-name">{{ current_user['real_name'] or current_user['username'] }} <span class="badge wrong">我</span></div>
+    <div class="rank-sub">继续加油，冲进前十！</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

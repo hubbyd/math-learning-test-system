@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>欢迎，{{ current_user['real_name'] or current_user['username'] }}</h2>
+<div class="hero">
+  <div class="hero-tag">MATH · LEARN · TEST</div>
+  <h1>欢迎回来，{{ current_user['real_name'] or current_user['username'] }}</h1>
+  <p>坚持每天进步一点，积分与排行榜见证你的成长。</p>
+</div>
 
 <div class="cards">
+  <div class="card stat">
+    <div class="stat-num">{{ points }}</div>
+    <div class="stat-label">累计学习积分</div>
+  </div>
   <div class="card stat">
     <div class="stat-num">{{ practice_cnt }}</div>
     <div class="stat-label">累计练习次数</div>
@@ -20,28 +28,34 @@
 <h3>功能入口</h3>
 <div class="cards">
   <a class="card entry" href="{{ url_for('learning') }}">
-    <h4>课程学习</h4><p>按章节浏览知识讲解与典型例题</p></a>
+    <h4><span class="entry-ico">学</span>课程学习</h4><p>按章节浏览知识讲解与典型例题</p></a>
   <a class="card entry" href="{{ url_for('practice') }}">
-    <h4>随堂练习</h4><p>按章节抽题练习，即时判分与解析</p></a>
+    <h4><span class="entry-ico">练</span>随堂练习</h4><p>按章节抽题练习，即时判分与解析</p></a>
   <a class="card entry" href="{{ url_for('test_form') }}">
-    <h4>综合测试</h4><p>按题型比例自动组卷，限时答题</p></a>
+    <h4><span class="entry-ico">测</span>综合测试</h4><p>按题型比例自动组卷，限时答题</p></a>
+  <a class="card entry" href="{{ url_for('wrongbook') }}">
+    <h4><span class="entry-ico">错</span>错题本</h4><p>自动收录错题，重做攻克薄弱点</p></a>
+  <a class="card entry" href="{{ url_for('leaderboard') }}">
+    <h4><span class="entry-ico">榜</span>排行榜</h4><p>学习积分实时排名，和同学一较高下</p></a>
   <a class="card entry" href="{{ url_for('scores') }}">
-    <h4>成绩查询</h4><p>查看历史测试成绩与错题</p></a>
+    <h4><span class="entry-ico">绩</span>成绩查询</h4><p>查看历史测试成绩与答卷详情</p></a>
 </div>
 
-<h3>课程章节</h3>
-<table class="table">
-  <thead><tr><th>序号</th><th>章节名称</th><th>课节数</th><th>题目数</th><th>操作</th></tr></thead>
-  <tbody>
+<h3>学习进度</h3>
+<div class="chapter-list">
   {% for c in chapters %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ c['name'] }}</td>
-      <td>{{ c['lesson_cnt'] }}</td>
-      <td>{{ c['q_cnt'] }}</td>
-      <td><a href="{{ url_for('learning_chapter', cid=c['id']) }}">进入学习</a></td>
-    </tr>
+    <a class="chapter-item" href="{{ url_for('learning_chapter', cid=c['id']) }}">
+      <div class="ch-head">
+        <span class="ch-no">CH {{ '%02d' % loop.index }}</span>
+        <span class="ch-name">{{ c['name'] }}</span>
+        <span class="ch-meta">{{ c['lesson_cnt'] }} 课节 · {{ c['q_cnt'] }} 道题</span>
+      </div>
+      <div class="progress-meta">
+        <span>已学 {{ c['viewed'] }}/{{ c['lesson_cnt'] }} 课节</span>
+        <strong>{{ c['progress'] }}%</strong>
+      </div>
+      <div class="progress"><span style="width: {{ c['progress'] }}%"></span></div>
+    </a>
   {% endfor %}
-  </tbody>
-</table>
+</div>
 {% endblock %}

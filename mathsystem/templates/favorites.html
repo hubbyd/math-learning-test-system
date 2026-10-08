@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}收藏夹{% endblock %}
+{% block content %}
+<h2>我的收藏夹</h2>
+<p class="muted">收藏典型题、易错题，随时回看与复习（在练习/测试的解析区点击"☆ 收藏本题"即可加入）。</p>
+
+{% if questions %}
+<div class="result-summary">
+  <span>已收藏 <strong>{{ questions|length }}</strong> 道题</span>
+</div>
+
+{% for q in questions %}
+<div class="question-block">
+  <div class="q-head">
+    <span class="q-index">收藏 {{ loop.index }}</span>
+    <span class="badge">{{ q['qtype_name'] }}</span>
+    <span class="badge diff">难度：{{ q['diff_name'] }}</span>
+    <span class="badge">{{ q['chapter_name'] }}</span>
+    <form method="post" action="{{ url_for('toggle_favorite', qid=q['id']) }}" style="margin-left:auto;">
+      <input type="hidden" name="next" value="{{ url_for('favorites') }}">
+      <button type="submit" class="fav-btn on">★ 取消收藏</button>
+    </form>
+  </div>
+  <div class="q-content">{{ q['content']|safe }}</div>
+  <div class="review">
+    <p>正确答案：<span class="ans-right">{{ q['display_answer'] }}</span></p>
+    {% if q['analysis'] %}
+      <p>解析：{{ q['analysis']|safe }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="card" style="text-align:center; padding:50px 20px;">
+  <p style="font-size:15px; font-weight:700; color:var(--text); margin:0 0 8px;">收藏夹还是空的</p>
+  <p class="muted">做完练习或测试后，在解析区点击"☆ 收藏本题"把好题存起来。</p>
+  <div class="actions" style="justify-content:center;">
+    <a class="btn primary" href="{{ url_for('practice') }}">去做练习</a>
+    <a class="btn" href="{{ url_for('test_form') }}">去综合测试</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

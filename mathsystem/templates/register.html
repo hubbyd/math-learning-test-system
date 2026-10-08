@@ -1,22 +1,128 @@
 {% extends "base.html" %}
 {% block title %}注册 - 高等数学学习、测试系统{% endblock %}
 {% block content %}
-<div class="form-box">
-  <h2>用户注册</h2>
-  <form method="post">
-    <label>用户名（3~20 位字母、数字或下划线）</label>
-    <input type="text" name="username" required>
-    <label>密码（不少于 6 位）</label>
-    <input type="password" name="password" required>
-    <label>姓名</label>
-    <input type="text" name="real_name">
-    <label>角色</label>
-    <select name="role">
-      <option value="student">学生</option>
-      <option value="teacher">教师</option>
-    </select>
-    <button type="submit" class="btn primary">注册</button>
-  </form>
-  <p class="tip">已有账号？<a href="{{ url_for('login') }}">去登录</a></p>
+<div class="auth-wrap">
+  <aside class="auth-aside">
+    <div class="brand-lockup"><span class="brand-mark">∑</span> 高等数学学习、测试系统</div>
+    <h2>创建账号，<br>开启你的高等数学进阶之路</h2>
+    <p class="lead">注册后即可使用全部学习与测试功能，学习数据自动云端同步</p>
+    <div class="auth-features">
+      <div class="auth-feature"><span class="ico">1</span><div><b>章节化学习：</b>知识要点、定理公式、典型例题逐节展开</div></div>
+      <div class="auth-feature"><span class="ico">2</span><div><b>分层练习：</b>按章节抽题，即时判分并给出解析</div></div>
+      <div class="auth-feature"><span class="ico">3</span><div><b>智能测试：</b>自定义题型与题量，限时自动交卷</div></div>
+      <div class="auth-feature"><span class="ico">4</span><div><b>成长追踪：</b>错题本、收藏夹、学习进度与积分排名</div></div>
+    </div>
+    <div class="auth-stats">
+      <div><span>3</span><small>角色权限</small></div>
+      <div><span>4</span><small>题型分类</small></div>
+      <div><span>∞</span><small>练习次数</small></div>
+    </div>
+  </aside>
+
+  <section class="auth-card">
+    <h3>用户注册</h3>
+    <p class="sub">带 <span style="color:var(--red-bright)">*</span> 为必填项，注册信息用于成绩统计</p>
+    <form method="post" id="reg-form">
+      <div class="field">
+        <label>选择身份 <span style="color:var(--red-bright)">*</span></label>
+        <div class="role-picker">
+          <label>
+            <input type="radio" name="role" value="student"
+                   {{ 'checked' if not form or form.role == 'student' }}>
+            <b>学生</b><em>学习课程、练习与测试</em>
+          </label>
+          <label>
+            <input type="radio" name="role" value="teacher"
+                   {{ 'checked' if form and form.role == 'teacher' }}>
+            <b>教师</b><em>额外可管理题库与统计分析</em>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="username">用户名 <span style="color:var(--red-bright)">*</span></label>
+        <input type="text" id="username" name="username" required
+               placeholder="3~20 位字母、数字或下划线"
+               value="{{ form.username if form else '' }}">
+      </div>
+
+      <div class="field">
+        <label for="real_name">真实姓名 <span style="color:var(--red-bright)">*</span></label>
+        <input type="text" id="real_name" name="real_name" required
+               placeholder="用于成绩单显示" value="{{ form.real_name if form else '' }}">
+      </div>
+
+      <div class="field">
+        <label for="student_no">学号 / 工号</label>
+        <input type="text" id="student_no" name="student_no"
+               placeholder="选填，如 2024001" value="{{ form.student_no if form else '' }}">
+      </div>
+
+      <div class="field">
+        <label for="email">邮箱</label>
+        <input type="text" id="email" name="email"
+               placeholder="选填，用于找回密码" value="{{ form.email if form else '' }}">
+      </div>
+
+      <div class="field">
+        <label for="password">密码 <span style="color:var(--red-bright)">*</span></label>
+        <div class="pw-wrap">
+          <input type="password" id="password" name="password" required
+                 placeholder="不少于 6 位，需含字母和数字">
+          <button type="button" class="pw-toggle" data-target="password">显示</button>
+        </div>
+        <div class="pw-meter" id="pw-meter"><i></i><i></i><i></i><i></i></div>
+        <p class="hintline" id="pw-text">密码强度：待输入</p>
+      </div>
+
+      <div class="field">
+        <label for="password2">确认密码 <span style="color:var(--red-bright)">*</span></label>
+        <input type="password" id="password2" name="password2" required placeholder="请再次输入密码">
+        <p class="hintline" id="pw2-text"></p>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" name="agree" value="1">
+        <span>我已阅读并同意《用户服务协议》与《隐私政策》，承诺使用真实信息注册。</span>
+      </label>
+
+      <button type="submit" class="btn primary">立即注册</button>
+    </form>
+    <p class="auth-switch">已有账号？<a href="{{ url_for('login') }}">返回登录</a></p>
+  </section>
 </div>
+
+<script>
+  var pw = document.getElementById('password');
+  var pw2 = document.getElementById('password2');
+  var meter = document.getElementById('pw-meter');
+  var text = document.getElementById('pw-text');
+  var text2 = document.getElementById('pw2-text');
+
+  pw.addEventListener('input', function () {
+    var v = pw.value, score = 0;
+    if (v.length >= 6) score++;
+    if (/[A-Za-z]/.test(v) && /\d/.test(v)) score++;
+    if (v.length >= 10) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    meter.className = 'pw-meter' + (v ? ' s' + score : '');
+    text.textContent = '密码强度：' + (v ? ['很弱', '较弱', '一般', '较强', '很强'][score] : '待输入');
+  });
+
+  pw2.addEventListener('input', function () {
+    if (!pw2.value) { text2.textContent = ''; return; }
+    var ok = pw2.value === pw.value;
+    text2.textContent = ok ? '两次密码一致 ✓' : '两次输入的密码不一致';
+    text2.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+  });
+
+  document.querySelectorAll('.pw-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.dataset.target);
+      var show = el.type === 'password';
+      el.type = show ? 'text' : 'password';
+      btn.textContent = show ? '隐藏' : '显示';
+    });
+  });
+</script>
 {% endblock %}

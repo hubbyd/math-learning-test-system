@@ -24,6 +24,14 @@
     <option value="2">中</option>
     <option value="3">难</option>
   </select>
+  <label>限时时长</label>
+  <select name="minutes">
+    <option value="15">15 分钟（随堂小测）</option>
+    <option value="30" selected>30 分钟（标准）</option>
+    <option value="45">45 分钟（一节实验课）</option>
+    <option value="60">60 分钟（完整测验）</option>
+    <option value="90">90 分钟（模拟期末）</option>
+  </select>
   <button type="submit" class="btn primary">生成试卷并开始测试</button>
 </form>
 {% endblock %}

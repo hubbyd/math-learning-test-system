@@ -1,16 +1,67 @@
 {% extends "base.html" %}
 {% block title %}登录 - 高等数学学习、测试系统{% endblock %}
 {% block content %}
-<div class="form-box">
-  <h2>用户登录</h2>
-  <form method="post">
-    <label>用户名</label>
-    <input type="text" name="username" required autofocus>
-    <label>密码</label>
-    <input type="password" name="password" required>
-    <button type="submit" class="btn primary">登录</button>
-  </form>
-  <p class="tip">还没有账号？<a href="{{ url_for('register') }}">立即注册</a></p>
-  <p class="tip small">测试账号：admin/admin123（管理员）、teacher/teacher123（教师）、student/student123（学生）</p>
+<div class="auth-wrap">
+  <aside class="auth-aside">
+    <div class="brand-lockup"><span class="brand-mark">∑</span> 高等数学学习、测试系统</div>
+    <h2>把高数学明白，<br>从每一次练习开始</h2>
+    <p class="lead">系统化章节学习 · 智能组卷测试 · 错题自动归纳 · 学习积分排行</p>
+    <div class="auth-features">
+      <div class="auth-feature"><span class="ico">学</span><div>6 大章节 18 个课节，配套知识要点、定理公式与典型例题</div></div>
+      <div class="auth-feature"><span class="ico">练</span><div>随堂练习即时判分，每题附详细解析</div></div>
+      <div class="auth-feature"><span class="ico">测</span><div>综合测试自动组卷、限时答题、自动评分</div></div>
+      <div class="auth-feature"><span class="ico">错</span><div>错题本 + 收藏夹 + 学习笔记，一次攻克薄弱点</div></div>
+    </div>
+    <div class="auth-stats">
+      <div><span>6</span><small>课程章节</small></div>
+      <div><span>18</span><small>知识课节</small></div>
+      <div><span>50+</span><small>精编习题</small></div>
+    </div>
+  </aside>
+
+  <section class="auth-card">
+    <h3>用户登录</h3>
+    <p class="sub">欢迎回来，请输入账号信息继续学习</p>
+    <form method="post" autocomplete="on">
+      <div class="field">
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" required autofocus
+               placeholder="请输入用户名" value="{{ request.form.get('username','') }}">
+      </div>
+      <div class="field">
+        <label for="password">密码</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" name="password" required placeholder="请输入密码">
+          <button type="button" class="pw-toggle" data-target="password">显示</button>
+        </div>
+      </div>
+      <button type="submit" class="btn primary">登录</button>
+    </form>
+    <p class="auth-switch">还没有账号？<a href="{{ url_for('register') }}">立即注册 →</a></p>
+    <div class="demo-accounts">
+      <strong style="color:var(--text-mid)">演示账号（点击即可自动填充）</strong><br>
+      <a href="#" data-user="admin" data-pwd="admin123">管理员</a> <code>admin / admin123</code><br>
+      <a href="#" data-user="teacher" data-pwd="teacher123">教师</a> <code>teacher / teacher123</code><br>
+      <a href="#" data-user="student" data-pwd="student123">学生</a> <code>student / student123</code>
+    </div>
+  </section>
 </div>
+
+<script>
+  document.querySelectorAll('.pw-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.dataset.target);
+      var show = el.type === 'password';
+      el.type = show ? 'text' : 'password';
+      btn.textContent = show ? '隐藏' : '显示';
+    });
+  });
+  document.querySelectorAll('.demo-accounts a[data-user]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('username').value = a.dataset.user;
+      document.getElementById('password').value = a.dataset.pwd;
+    });
+  });
+</script>
 {% endblock %}

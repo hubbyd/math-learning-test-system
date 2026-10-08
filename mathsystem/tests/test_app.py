@@ -73,17 +73,40 @@ def test_login_wrong_password(client):
     assert "用户名或密码错误" in resp.get_data(as_text=True)
 
 
-def test_register_and_duplicate(client):
-    resp = client.post("/register",
-                       data={"username": "newuser01", "password": "abc123456",
-                             "real_name": "王同学", "role": "student"},
-                       follow_redirects=True)
+def test_register_and_duplicate(client, app):
+    payload = {"username": "newuser01", "password": "abc123456", "password2": "abc123456",
+               "real_name": "王同学", "role": "student", "agree": "1",
+               "student_no": "2024099", "email": "newuser01@example.com"}
+    resp = client.post("/register", data=payload, follow_redirects=True)
     assert "注册成功" in resp.get_data(as_text=True)
+    with app.app_context():
+        row = query("SELECT * FROM user WHERE username='newuser01'")[0]
+        assert row["student_no"] == "2024099"
+        assert row["email"] == "newuser01@example.com"
+        assert row["role"] == "student"
     # 重复注册同名用户
-    resp2 = client.post("/register",
-                        data={"username": "newuser01", "password": "abc123456"},
-                        follow_redirects=True)
+    resp2 = client.post("/register", data=payload, follow_redirects=True)
     assert "该用户名已存在" in resp2.get_data(as_text=True)
+
+
+def test_register_validation_rules(client):
+    base = {"username": "stu0001", "password": "abc123456", "password2": "abc123456",
+            "real_name": "赵同学", "role": "student", "agree": "1"}
+    # 两次密码不一致
+    bad = dict(base, password2="abc123457")
+    assert "两次输入的密码不一致" in client.post("/register", data=bad).get_data(as_text=True)
+    # 密码缺少数字
+    bad = dict(base, password="abcdefgh", password2="abcdefgh")
+    assert "需同时包含字母和数字" in client.post("/register", data=bad).get_data(as_text=True)
+    # 未勾选协议
+    bad = dict(base); bad.pop("agree")
+    assert "用户服务协议" in client.post("/register", data=bad).get_data(as_text=True)
+    # 邮箱格式错误
+    bad = dict(base, email="not-an-email")
+    assert "邮箱格式不正确" in client.post("/register", data=bad).get_data(as_text=True)
+    # 姓名为空
+    bad = dict(base, real_name="")
+    assert "真实姓名" in client.post("/register", data=bad).get_data(as_text=True)
 
 
 # --------------------------------------------------------------------------
@@ -261,6 +284,100 @@ def test_scores_and_stats_pages(client):
     login(client, "teacher", "teacher123")
     assert client.get("/scores").status_code == 200
     assert client.get("/stats").status_code == 200
+
+
+# --------------------------------------------------------------------------
+# 8b. 错题本 / 收藏夹 / 排行榜 / 学习笔记（扩展功能）
+# --------------------------------------------------------------------------
+def test_wrongbook_auto_collect_and_remove(client, app):
+    login(client, "student", "student123")
+    with app.app_context():
+        q = query("SELECT id, answer FROM question WHERE qtype='single' LIMIT 1")[0]
+        qid = q["id"]
+        uid = query("SELECT id FROM user WHERE username='student'")[0]["id"]
+
+    # 故意答错 → 自动收录
+    client.get("/practice/start?chapter_id=1&count=20")
+    client.post("/practice/submit", data={"qids": str(qid), "q_%d" % qid: "Z"})
+    with app.app_context():
+        rows = query("SELECT * FROM wrong_question WHERE user_id=? AND question_id=?", (uid, qid))
+    assert len(rows) == 1
+    assert rows[0]["wrong_cnt"] == 1
+
+    # 重做答对 → 自动移除
+    client.post("/practice/submit", data={"qids": str(qid), "q_%d" % qid: q["answer"]})
+    with app.app_context():
+        rows = query("SELECT * FROM wrong_question WHERE user_id=? AND question_id=?", (uid, qid))
+    assert rows == []
+
+    assert client.get("/wrongbook").status_code == 200
+
+
+def test_favorite_toggle_and_page(client, app):
+    login(client, "student", "student123")
+    with app.app_context():
+        qid = query("SELECT id FROM question LIMIT 1")[0]["id"]
+
+    client.post("/question/%d/favorite" % qid, data={"next": "/favorites"})
+    with app.app_context():
+        assert len(query("SELECT 1 FROM favorite WHERE question_id=?", (qid,))) == 1
+    resp = client.get("/favorites")
+    assert resp.status_code == 200
+    assert "取消收藏" in resp.get_data(as_text=True)
+
+    client.post("/question/%d/favorite" % qid)
+    with app.app_context():
+        assert query("SELECT 1 FROM favorite WHERE question_id=?", (qid,)) == []
+
+
+def test_leaderboard_ranking(client, app):
+    login(client, "student", "student123")
+    resp = client.get("/leaderboard")
+    assert resp.status_code == 200
+    body = resp.get_data(as_text=True)
+    assert "学习排行榜" in body
+    with app.app_context():
+        users = query("SELECT COUNT(*) c FROM user")[0]["c"]
+        assert users == 3
+
+
+def test_lesson_note_save_and_clear(client, app):
+    login(client, "student", "student123")
+    with app.app_context():
+        lid = query("SELECT id FROM lesson LIMIT 1")[0]["id"]
+
+    client.post("/learning/lesson/%d/note" % lid, data={"content": "重点：两个重要极限"})
+    with app.app_context():
+        row = query("SELECT content FROM note WHERE lesson_id=?", (lid,))[0]
+    assert "两个重要极限" in row["content"]
+
+    client.post("/learning/lesson/%d/note" % lid, data={"content": ""})
+    with app.app_context():
+        assert query("SELECT 1 FROM note WHERE lesson_id=?", (lid,)) == []
+
+
+def test_test_paper_time_limit_persisted(client, app):
+    login(client, "student", "student123")
+    resp = client.post("/test/create", data={"n_single": 1, "minutes": 15})
+    pid = int(resp.headers["Location"].rstrip("/").split("/")[-1])
+    with app.app_context():
+        paper = query("SELECT * FROM paper WHERE id=?", (pid,))[0]
+    assert paper["time_limit"] == 900
+    page = client.get("/test/%d" % pid)
+    assert page.status_code == 200
+    # 剩余时间由服务端计算，刷新页面不会重置
+    assert b"var remain = " in page.data
+
+
+def test_content_expanded(app):
+    """课程内容与题库相较初版已扩充。"""
+    with app.app_context():
+        lessons = query("SELECT COUNT(*) c FROM lesson")[0]["c"]
+        questions = query("SELECT COUNT(*) c FROM question")[0]["c"]
+        types = {r["qtype"] for r in query("SELECT DISTINCT qtype FROM question")}
+    assert lessons == 18
+    assert questions >= 45
+    assert types == {"single", "multi", "judge", "fill"}
 
 
 # --------------------------------------------------------------------------
